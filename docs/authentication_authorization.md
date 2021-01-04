@@ -245,4 +245,4 @@ class UserController
 While this is the most secured mode, it can have drawbacks when working with development tools
 (you need to be logged as admin to fetch the complete schema).
 
-<div class="alert alert-info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optionnal from GraphQLite 4+.</div>
+<div class="alert alert-info">The "HideIfUnauthorized" mode was the default mode in GraphQLite 3 and is optional from GraphQLite 4+.</div>
