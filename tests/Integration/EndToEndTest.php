@@ -24,6 +24,7 @@ use TheCodingMachine\GraphQLite\InputTypeUtils;
 use TheCodingMachine\GraphQLite\Loggers\ExceptionLogger;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CompositeTypeMapper;
+use TheCodingMachine\GraphQLite\Mappers\DuplicateMappingException;
 use TheCodingMachine\GraphQLite\Mappers\GlobTypeMapper;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\ContainerParameterHandler;
 use TheCodingMachine\GraphQLite\Mappers\Parameters\InjectUserParameterHandler;
@@ -1542,6 +1543,22 @@ class EndToEndTest extends TestCase
 
         $this->expectException(CannotMapTypeException::class);
         $this->expectExceptionMessage('For parameter $inAndOut, in TheCodingMachine\\GraphQLite\\Fixtures\\InputOutputNameConflict\\Controllers\\InAndOutController::testInAndOut, type "InAndOut" must be an input type (if you declared an input type with the name "InAndOut", make sure that there are no output type with the same name as this is forbidden by the GraphQL spec).');
+
+        $schema->validate();
+    }
+
+    public function testDuplicateQueriesOnMultipleControllers(): void
+    {
+        $arrayAdapter = new ArrayAdapter();
+        $arrayAdapter->setLogger(new ExceptionLogger());
+        $schemaFactory = new SchemaFactory(new Psr16Cache($arrayAdapter), new BasicAutoWiringContainer(new EmptyContainer()));
+        $schemaFactory->addControllerNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesOnMultipleControllers\\Controllers');
+        $schemaFactory->addTypeNamespace('TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesOnMultipleControllers\\Types');
+
+        $schema = $schemaFactory->createSchema();
+
+        $this->expectException(DuplicateMappingException::class);
+        $this->expectExceptionMessage('The query/mutation \'allPosts\' is declared twice: in class \'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesOnMultipleControllers\\Controllers\\ControllerA\' and in class \'TheCodingMachine\\GraphQLite\\Fixtures\\DuplicateQueriesOnMultipleControllers\\Controllers\\ControllerB\'');
 
         $schema->validate();
     }
